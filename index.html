@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="paper">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>词境 · 英语词汇学习平台</title>
+<style>
+:root{
+  --bg:#F3F6FC; --surface:#FFFFFF; --surface-2:#EDF2FA; --surface-3:#F7F9FE;
+  --ink:#0C1526; --ink-2:#44506A; --ink-3:#6C7889;
+  --line:#E1E7F1; --line-2:#C7D1E2;
+  --accent:#2563EB; --accent-hover:#1D4ED8; --accent-soft:#E8F0FF;
+  --warm:#6D5BF6; --warm-soft:#EEEBFF;
+  --danger:#DC4C4C;
+  --font-ui:"Inter","PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  --font-read:"Inter","PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono","SF Mono",ui-monospace,Consolas,"PingFang SC",monospace;
+  --read-size:20px; --leading:1.9;
+  --r-sm:8px; --r-md:12px; --r-lg:16px;
+  --sh-1:0 1px 2px rgba(16,32,64,.06);
+  --sh-2:0 14px 36px rgba(16,32,64,.10);
+  --ease:cubic-bezier(.2,.7,.3,1);
+  --topbar:60px; --side:228px; --rail:300px;
+}
+html[data-theme="white"]{
+  --bg:#F1F4FA; --surface:#FFFFFF; --surface-2:#EEF2F9; --surface-3:#F8FAFE; --line:#E3E8F1;
+}
+html[data-theme="night"]{
+  --bg:#0A1120; --surface:#111A2B; --surface-2:#172133; --surface-3:#0E1626;
+  --ink:#E7EEFA; --ink-2:#A8B5CB; --ink-3:#6F7E97;
+  --line:#1E2A41; --line-2:#2B3A54;
+  --accent:#5B9BFF; --accent-hover:#7FB2FF; --accent-soft:#16233C;
+  --warm:#A99BFF; --warm-soft:#1D2340;
+  --danger:#F0736F;
+  --sh-1:0 1px 2px rgba(0,0,0,.35);
+  --sh-2:0 14px 36px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;color:var(--ink);font-family:var(--font-ui);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow:hidden;
+  background:
+    radial-gradient(1100px 520px at 82% -14%, color-mix(in srgb,var(--accent) 9%, transparent), transparent 68%),
+    radial-gradient(800px 420px at 8% 108%, color-mix(in srgb,var(--warm) 6%, transparent), transparent 70%),
+    var(--bg)}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,select{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+::selection{background:var(--accent-soft);color:var(--ink)}
+svg{display:block}
+
+/* ================= app shell ================= */
+.app{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.shellbar{
+  height:var(--topbar);flex:none;display:flex;align-items:center;gap:24px;
+  padding:0 20px 0 22px;border-bottom:1px solid var(--line);background:var(--surface);
+}
+.brand{display:flex;align-items:center;gap:10px;width:calc(var(--side) - 22px);flex:none}
+.brand .mark{width:26px;height:26px;border-radius:8px;background:var(--accent);display:grid;place-items:center;color:var(--surface);font-family:var(--font-read);font-size:15px;font-weight:700}
+.brand b{font-size:16px;letter-spacing:.06em}
+.brand span{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.14em;margin-left:2px}
+
+.search{flex:1;max-width:460px;display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;background:var(--surface-2);border:1px solid transparent;border-radius:10px;transition:.15s}
+.search:focus-within{background:var(--surface);border-color:var(--line-2);box-shadow:var(--sh-1)}
+.search input{flex:1;border:none;background:none;outline:none;font-size:13px}
+.search input::placeholder{color:var(--ink-3)}
+.search kbd{font-family:var(--font-ui);font-size:11px;color:var(--ink-3);border:1px solid var(--line-2);border-radius:5px;padding:1px 5px;background:var(--surface)}
+
+.shellbar .right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.streak{display:flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;background:var(--warm-soft);color:var(--warm);font-size:12px;font-weight:600;letter-spacing:.02em}
+.streak b{font-size:13px}
+.iconbtn{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--ink-2);transition:.15s}
+.iconbtn:hover{background:var(--surface-2);color:var(--ink)}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:12px;font-weight:700;margin-left:4px}
+
+.shell{flex:1;display:flex;min-height:0}
+
+/* ---------- sidebar ---------- */
+.sidenav{
+  width:var(--side);flex:none;border-right:1px solid var(--line);background:var(--surface);
+  display:flex;flex-direction:column;padding:18px 14px 14px;gap:4px;
+}
+.navlabel{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;color:var(--ink-3);padding:10px 10px 6px}
+.navitem{display:flex;align-items:center;gap:12px;height:40px;padding:0 10px;border-radius:9px;color:var(--ink-2);font-size:13.5px;transition:.15s;position:relative}
+.navitem svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;flex:none}
+.navitem:hover{background:var(--surface-2);color:var(--ink)}
+.navitem.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.navitem .badge{margin-left:auto;font-size:11px;font-weight:600;background:var(--warm-soft);color:var(--warm);border-radius:999px;padding:1px 7px}
+.navitem.active .badge{background:var(--accent);color:var(--surface)}
+.sidenav .push{margin-top:auto}
+
+.bookcard{border:1px solid var(--line);border-radius:var(--r-md);padding:14px;background:var(--surface-3)}
+.bookcard .row{display:flex;align-items:center;gap:12px}
+.ring{position:relative;width:42px;height:42px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring .pct{position:absolute;inset:0;display:grid;place-items:center;font-size:10px;font-weight:700;color:var(--accent)}
+.bookcard .t{font-size:12.5px;font-weight:600;line-height:1.35}
+.bookcard .s{font-size:11px;color:var(--ink-3);margin-top:2px}
+.bookcard .foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-3)}
+.bookcard .foot button{font-size:11px;color:var(--accent);font-weight:600}
+
+/* ---------- stage ---------- */
+.stage{flex:1;min-width:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable}
+.view{display:none;padding:40px 48px 64px;max-width:820px;margin:0 auto}
+.view.active{display:block;animation:rise .22s var(--ease)}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- rail ---------- */
+.rail{width:var(--rail);flex:none;border-left:1px solid var(--line);background:var(--surface);padding:24px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+body[data-view="read"] .rail,body[data-view="review"] .rail,body[data-view="library"] .rail{display:none}
+.railcard{border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;background:var(--surface)}
+.railcard .cap{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;color:var(--ink-3);margin-bottom:10px}
+.railcard .big{font-size:30px;line-height:1.1;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.railcard .big small{font-size:12px;font-weight:400;color:var(--ink-3);letter-spacing:0;margin-left:4px}
+.railcard .sub{font-size:12px;color:var(--ink-3);margin-top:4px}
+.chiprow{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chipw{font-family:var(--font-read);font-size:12px;padding:3px 8px;border-radius:6px;background:var(--surface-2);color:var(--ink-2)}
+.railcard .btn-mini{margin-top:14px;width:100%;height:36px;border-radius:9px;border:1px solid var(--line-2);font-size:12.5px;font-weight:600;color:var(--ink);transition:.15s}
+.railcard .btn-mini:hover{border-color:var(--accent);color:var(--accent)}
+.sparkline{width:100%;height:44px;margin-top:12px}
+.railcard .delta{font-size:12px;color:var(--accent);font-weight:600;margin-top:8px}
+.tip{font-size:12px;line-height:1.8;color:var(--ink-3);padding:0 4px}
+.tip b{color:var(--ink-2);font-weight:600}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;height:48px;padding:0 24px;border-radius:10px;font-size:14px;font-weight:600;letter-spacing:.01em;transition:background .15s,transform .08s,border-color .15s,box-shadow .15s}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 1px 2px rgba(37,99,235,.28),0 0 0 1px rgba(37,99,235,.10) inset}
+html[data-theme="night"] .btn-primary{color:#06101F}
+.btn-primary:hover{background:var(--accent-hover);box-shadow:0 6px 20px rgba(37,99,235,.28)}
+.btn-ghost{border:1px solid var(--line-2);background:var(--surface);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--ink-3)}
+.btn-sm{height:38px;padding:0 16px;font-size:13px;border-radius:9px}
+.btn[disabled]{opacity:.4;cursor:not-allowed;box-shadow:none}
+
+/* ---------- today ---------- */
+.today{position:relative}
+.eyebrow{display:flex;align-items:center;gap:10px;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.16em;color:var(--ink-3);text-transform:uppercase}
+.eyebrow .line{width:22px;height:1px;background:var(--line-2)}
+.hero{position:relative;padding:26px 0 30px;border-bottom:1px solid var(--line)}
+.hero h1{font-family:var(--font-read);font-size:40px;line-height:1.16;letter-spacing:-.032em;font-weight:650;margin:16px 0 14px;max-width:16ch}
+.hero .meta{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--ink-3);flex-wrap:wrap}
+.hero .meta i{width:3px;height:3px;border-radius:50%;background:var(--line-2)}
+.hero .meta b{color:var(--ink-2);font-weight:600}
+.wave{position:absolute;right:-8px;top:26px;width:280px;height:118px;opacity:.55;pointer-events:none}
+html[data-theme="night"] .wave{opacity:.35}
+
+.excerpt{font-family:var(--font-read);font-size:16px;line-height:1.85;color:var(--ink-2);margin:22px 0 0;max-width:56ch}
+.excerpt .hl{border-bottom:1px dotted color-mix(in srgb,var(--accent) 55%,transparent);padding-bottom:1px}
+
+.cta-row{display:flex;align-items:center;gap:14px;margin-top:26px}
+.cta-note{font-size:12px;color:var(--ink-3);line-height:1.5}
+.keyhint{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:1px 6px;background:var(--surface);margin-left:6px}
+
+.plan{margin-top:32px}
+.plan .cap{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.plan .cap b{font-size:13px;font-weight:600}
+.plan .cap span{font-size:11.5px;color:var(--ink-3)}
+.steps{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--surface)}
+.step{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.step:last-child{border-bottom:none}
+.step .dot{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;font-size:10px;color:var(--ink-3);flex:none}
+.step.done .dot{background:var(--accent);border-color:var(--accent);color:#fff}
+.step.now .dot{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.step .t{font-size:13.5px}
+.step .t small{display:block;font-size:11.5px;color:var(--ink-3);margin-top:1px}
+.step .r{margin-left:auto;font-size:11.5px;color:var(--ink-3)}
+.step.now{background:var(--surface-3)}
+.step.done .t{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--line-2)}
+
+.quickline{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:22px;padding:14px 16px;border:1px dashed var(--line-2);border-radius:var(--r-md);font-size:12.5px;color:var(--ink-2)}
+.quickline button{color:var(--accent);font-weight:600}
+
+/* ---------- 今天的背单词条（基础模式） ---------- */
+.todaybar{display:flex;align-items:center;gap:14px;margin-top:20px;padding:13px 16px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface)}
+.todaybar .ic{width:34px;height:34px;border-radius:9px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.todaybar .txt{flex:1;min-width:0}
+.todaybar .txt b{font-size:13.5px;font-weight:600}
+.todaybar .txt span{font-size:11.5px;color:var(--ink-3);margin-left:6px}
+.todaybar .txt div{font-size:11.5px;color:var(--ink-3);margin-top:3px}
+.todaybar .track{max-width:120px;margin:0}
+.todaybar .btn{flex:none;height:36px;padding:0 16px;font-size:12.5px;border-radius:9px}
+
+/* ---------- reading overlay ---------- */
+.reader{position:fixed;inset:0;z-index:60;background:var(--bg);display:none;flex-direction:column}
+body[data-view="read"] .reader{display:flex}
+.reader-top{height:56px;flex:none;display:flex;align-items:center;gap:16px;padding:0 20px;border-bottom:1px solid var(--line);background:var(--surface)}
+.reader-top .mid{flex:1;display:flex;align-items:center;gap:10px;justify-content:center;font-size:12px;color:var(--ink-3)}
+.pill{display:flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;background:var(--surface-2);font-size:11.5px;color:var(--ink-2)}
+.reader-scroll{flex:1;overflow-y:auto;scrollbar-gutter:stable}
+.reader-progress{position:absolute;left:0;right:0;top:56px;height:2px;background:transparent;z-index:2}
+.reader-progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .1s linear}
+.reader-inner{max-width:700px;margin:0 auto;padding:56px 32px 96px}
+.reader-inner h1{font-family:var(--font-read);font-size:38px;line-height:1.22;letter-spacing:-.02em;font-weight:600;margin:0 0 10px}
+.reader-inner .byline{font-size:12px;color:var(--ink-3);letter-spacing:.02em;margin-bottom:42px;display:flex;gap:10px;align-items:center}
+.reader-inner .byline i{width:3px;height:3px;border-radius:50%;background:var(--line-2)}
+.reader-inner p{font-family:var(--font-read);font-size:var(--read-size);line-height:var(--leading);margin:0 0 1.6em;letter-spacing:.003em}
+.target{text-decoration:underline dotted color-mix(in srgb,var(--accent) 75%,transparent);text-decoration-thickness:1.5px;text-underline-offset:4px;cursor:pointer;transition:text-decoration-color .15s}
+.target:hover{text-decoration-style:solid}
+.target.seen{text-decoration-color:var(--ink-3);color:var(--ink-2)}
+.reader-foot{position:sticky;bottom:0;display:flex;align-items:center;gap:12px;padding:12px 0 20px;background:linear-gradient(to top,var(--bg) 72%,transparent)}
+.reader-foot .btn-primary{flex:1;max-width:100%}
+
+/* inline quiz */
+.inline-panel{border-top:1px solid var(--line);padding:32px 0 8px;animation:rise .2s var(--ease)}
+.q-step{font-size:11px;letter-spacing:.12em;color:var(--ink-3);text-transform:uppercase;margin-bottom:10px}
+.q-text{font-size:20px;line-height:1.55;font-weight:600;margin-bottom:20px;letter-spacing:-.01em}
+.opts{display:grid;gap:8px;margin-bottom:18px}
+.opt{display:flex;align-items:center;gap:12px;min-height:50px;padding:10px 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface);text-align:left;font-size:14px;transition:.13s}
+.opt:hover{border-color:var(--line-2);background:var(--surface-3)}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt .mark{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line-2);flex:none;display:grid;place-items:center;font-size:10px;color:#fff}
+.opt[aria-pressed="true"] .mark{border-color:var(--accent);background:var(--accent);color:#fff}
+.opt-note{font-size:13px;color:var(--ink-2);background:var(--surface-2);border-radius:10px;padding:12px 14px;margin-bottom:16px;line-height:1.7}
+.q-actions{display:flex;align-items:center;justify-content:flex-end;gap:16px}
+.q-actions .link{font-size:13px;color:var(--ink-3);text-decoration:underline;text-underline-offset:3px}
+
+/* recall */
+.recall{border-top:1px solid var(--line);padding:44px 0 24px;display:flex;flex-direction:column;align-items:center;animation:rise .2s var(--ease)}
+.recall .dots{display:flex;gap:6px;margin-bottom:30px}
+.recall .dots i{width:6px;height:6px;border-radius:50%;background:var(--line-2)}
+.recall .dots i.on{background:var(--accent)}
+.recall .word{font-family:var(--font-read);font-size:42px;font-weight:600;letter-spacing:-.015em}
+.recall .phon{font-size:13px;color:var(--ink-3);margin:6px 0 34px}
+.recall .btns{display:flex;gap:10px}
+.recall .btns .btn{width:150px}
+
+/* done */
+.done-bar{border-top:1px solid var(--line);padding:36px 0 8px;animation:rise .25s var(--ease)}
+.done-bar .line1{font-size:22px;font-weight:600;letter-spacing:-.01em;margin-bottom:14px}
+.done-bar .stat{font-size:14px;color:var(--ink-2);line-height:2}
+.done-bar .stat b{font-variant-numeric:tabular-nums;color:var(--ink)}
+.done-actions{display:flex;gap:10px;margin-top:26px}
+.done-actions .btn{flex:1}
+
+/* ---------- review ---------- */
+.reviewhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;font-size:12px;color:var(--ink-3)}
+.review-stage{min-height:calc(100vh - 200px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:48px}
+.review-card{width:100%;max-width:560px;min-height:320px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh-1);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:44px 36px;text-align:center}
+.review-card .word{font-family:var(--font-read);font-size:38px;font-weight:600;letter-spacing:-.015em}
+.review-card .phon{font-size:13px;color:var(--ink-3);margin-top:6px}
+.review-card .hint{font-size:11.5px;color:var(--ink-3);margin-top:16px;letter-spacing:.03em}
+.review-card .back{margin-top:24px;padding-top:24px;border-top:1px solid var(--line);width:100%;animation:rise .2s var(--ease)}
+.review-card .meaning{font-size:19px;font-weight:600;margin-bottom:8px}
+.review-card .example{font-family:var(--font-read);font-size:15.5px;line-height:1.8;color:var(--ink-2)}
+.rating{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;max-width:560px;margin-top:16px}
+.rating button{height:56px;border:1px solid var(--line);border-radius:11px;background:var(--surface);font-size:14px;color:var(--ink-2);transition:.13s}
+.rating button:hover:not([disabled]){border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.rating button[disabled]{opacity:.35;cursor:not-allowed}
+.rating small{display:block;font-size:10.5px;color:var(--ink-3);margin-top:2px}
+.center-actions{display:flex;gap:10px;justify-content:center;margin-top:26px}
+
+/* ---------- library ---------- */
+.pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px}
+.pagehead h1{font-size:26px;font-weight:600;letter-spacing:-.015em;margin:0}
+.pagehead p{margin:6px 0 0;font-size:12.5px;color:var(--ink-3)}
+.toolbar{display:flex;gap:10px;margin-bottom:18px}
+.searchbox{flex:1;display:flex;align-items:center;gap:10px;height:40px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.searchbox input{flex:1;border:none;background:none;outline:none;font-size:13px}
+.tabs{display:flex;gap:6px;padding:4px;background:var(--surface-2);border-radius:10px;width:fit-content;margin-bottom:14px}
+.tabs button{height:30px;padding:0 14px;border-radius:7px;font-size:12.5px;color:var(--ink-2)}
+.tabs button.active{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--sh-1)}
+.chips{display:flex;gap:6px;margin-bottom:18px}
+.chip{height:28px;padding:0 12px;border-radius:999px;border:1px solid var(--line);font-size:11.5px;color:var(--ink-2);background:var(--surface)}
+.chip.on{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 35%,transparent);color:var(--accent);font-weight:600}
+.bookcard-wide{display:flex;align-items:center;gap:18px;padding:16px 18px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);margin-bottom:20px}
+.bookcard-wide .meta{flex:1}
+.bookcard-wide .meta b{font-size:13.5px}
+.bookcard-wide .meta div{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.track{height:5px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin-top:9px;max-width:320px}
+.track i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.table{border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--surface)}
+.thead,.wrow{display:grid;grid-template-columns:1.1fr .9fr 1.2fr .7fr;gap:12px;align-items:center;padding:11px 16px}
+.thead{font-size:10.5px;letter-spacing:.12em;color:var(--ink-3);border-bottom:1px solid var(--line);background:var(--surface-3);text-transform:uppercase}
+.wrow{border-bottom:1px solid var(--line);font-size:13px}
+.wrow:last-child{border-bottom:none}
+.wrow:hover{background:var(--surface-3)}
+.wrow .w{font-family:var(--font-read);font-size:16px}
+.wrow .p{font-size:11.5px;color:var(--ink-3)}
+.wrow .m{color:var(--ink-2)}
+.wrow .due{text-align:right;font-size:11.5px;color:var(--ink-3)}
+.wrow .due.today{color:var(--warm);font-weight:600}
+.empty{padding:34px 16px;text-align:center;color:var(--ink-3);font-size:13px}
+
+/* ---------- me / progress ---------- */
+.grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px}
+.card .cap{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;color:var(--ink-3);text-transform:uppercase}
+.hero-num{font-size:56px;line-height:1;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin:10px 0 6px}
+.delta{font-size:12.5px;color:var(--accent);font-weight:600}
+.forecast{font-size:12.5px;color:var(--ink-2);margin-top:14px;padding-top:14px;border-top:1px solid var(--line);line-height:1.7}
+.setting{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid var(--line);font-size:13px}
+.setting:last-child{border-bottom:none;padding-bottom:0}
+.setting select{border:none;background:none;color:var(--ink-2);font-size:12.5px;outline:none;padding:4px 0}
+.setting.danger{color:var(--danger)}
+.sectionlabel{font-size:10.5px;letter-spacing:.14em;color:var(--ink-3);text-transform:uppercase;margin:26px 0 8px}
+.more{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.more summary{cursor:pointer;font-size:12.5px;color:var(--ink-2);list-style:none;display:flex;justify-content:space-between}
+.more summary::-webkit-details-marker{display:none}
+.more summary::after{content:"+";color:var(--ink-3)}
+.more[open] summary::after{content:"−"}
+.more .body{padding-top:10px;font-size:12.5px;color:var(--ink-2);line-height:1.9}
+.gapbar{display:grid;grid-template-columns:46px 1fr 52px;gap:10px;align-items:center;margin:8px 0;font-size:11.5px}
+.gapbar .t{height:5px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.gapbar .t i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.gapbar .v{text-align:right;color:var(--ink-3)}
+
+/* ---------- 背单词会话（基础模式） ---------- */
+.learn{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;
+  background:radial-gradient(900px 460px at 50% -8%, color-mix(in srgb,var(--accent) 9%, transparent), transparent 70%),var(--bg)}
+body[data-view="learn"] .learn{display:flex}
+.learn-top{height:56px;flex:none;display:flex;align-items:center;gap:16px;padding:0 20px;border-bottom:1px solid var(--line);background:var(--surface)}
+.learn-top .mid{flex:1;display:flex;align-items:baseline;justify-content:center;gap:10px;min-width:0}
+.learn-top .mid b{font-size:13px;font-weight:600}
+.learn-top .mid span{font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.learn-top .count{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;min-width:54px;text-align:right}
+.learn-bar{height:2px;flex:none;background:var(--surface-2)}
+.learn-bar i{display:block;height:100%;width:80%;background:var(--accent);transition:width .25s var(--ease)}
+.learn-scroll{flex:1;overflow-y:auto;display:flex;align-items:center;justify-content:center;padding:36px 20px 48px}
+.learn-inner{width:100%;max-width:560px}
+.learn-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh-1);padding:44px 36px;text-align:center;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.learn-card:not(.open){cursor:pointer}
+.learn-card:not(.open):hover{border-color:var(--line-2)}
+.learn-card .word{font-family:var(--font-read);font-size:44px;font-weight:600;letter-spacing:-.015em;line-height:1.2}
+.learn-card .phon{font-size:13px;color:var(--ink-3);margin-top:10px;display:flex;align-items:center;gap:8px}
+.learn-card .phon button{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:11px;color:var(--ink-2);transition:.13s}
+.learn-card .phon button:hover{background:var(--surface-2);color:var(--ink)}
+.learn-card .body{margin-top:24px;padding-top:22px;border-top:1px solid var(--line);width:100%;text-align:left;animation:rise .2s var(--ease)}
+.learn-card .meaning{font-size:20px;font-weight:600;margin-bottom:12px;letter-spacing:-.01em}
+.learn-card .meaning em{font-style:normal;font-size:12px;font-weight:400;color:var(--ink-3);margin-right:6px}
+.learn-card .ex{font-family:var(--font-read);font-size:16px;line-height:1.75}
+.learn-card .ex-cn{font-size:12.5px;color:var(--ink-3);margin-top:6px}
+.learn-card .note{font-size:12px;color:var(--ink-2);background:var(--surface-2);border-radius:8px;padding:8px 12px;margin-top:14px}
+.learn-card .again{font-size:11.5px;color:var(--warm);margin-top:12px}
+.learn-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.learn-actions button{height:56px;border:1px solid var(--line);border-radius:11px;background:var(--surface);font-size:14px;color:var(--ink-2);transition:.13s}
+.learn-actions button:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.learn-actions small{display:block;font-size:10.5px;color:var(--ink-3);margin-top:2px}
+.learn-meta{display:flex;justify-content:space-between;margin-top:16px;font-size:11.5px;color:var(--ink-3)}
+.learn-done{text-align:center;padding:24px 0}
+.learn-done .h{font-family:var(--font-read);font-size:28px;font-weight:600;letter-spacing:-.01em;margin-bottom:14px}
+.learn-done .s{font-size:13.5px;color:var(--ink-2);line-height:2}
+.learn-done .acts{display:flex;gap:10px;margin-top:26px}
+.learn-done .acts .btn{flex:1}
+
+/* ---------- sheets ---------- */
+.scrim{position:fixed;inset:0;background:rgba(20,18,15,.28);opacity:0;pointer-events:none;transition:opacity .2s var(--ease);z-index:80}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;z-index:90;background:var(--surface);box-shadow:var(--sh-2);padding:24px;transform:translateY(102%);transition:transform .24s var(--ease);max-height:72vh;overflow:auto;left:0;right:0;bottom:0;border-radius:18px 18px 0 0}
+.sheet.open{transform:none}
+.sheet .handle{width:36px;height:4px;border-radius:99px;background:var(--line-2);margin:0 auto 18px}
+.sheet h3{font-family:var(--font-read);font-size:30px;font-weight:600;margin:0}
+.sheet .phon{font-size:13px;color:var(--ink-3);margin:6px 0 18px;display:flex;gap:10px;align-items:center}
+.sheet .meaning{font-size:17px;font-weight:600;margin-bottom:10px}
+.sheet .ctx{font-size:13px;color:var(--ink-2);background:var(--surface-2);border-radius:10px;padding:12px 14px;line-height:1.75;margin-bottom:18px}
+.sheet .close{position:absolute;right:14px;top:14px;width:32px;height:32px;border-radius:8px;color:var(--ink-3);display:grid;place-items:center}
+.sheet .close:hover{background:var(--surface-2)}
+.sheet .group{border-top:1px solid var(--line);margin-top:18px;padding-top:14px}
+.sheet .group h4{font-size:10.5px;letter-spacing:.14em;color:var(--ink-3);margin:0 0 10px;font-weight:500;text-transform:uppercase}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;height:38px;border:1px solid var(--line);border-radius:9px;font-size:12.5px;color:var(--ink-2);background:var(--surface-3)}
+.seg button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600}
+.bookpick{display:grid;gap:6px}
+.bookpick button{display:flex;align-items:center;justify-content:space-between;height:42px;padding:0 14px;border:1px solid var(--line);border-radius:9px;background:var(--surface-3);font-size:13px;transition:.13s}
+.bookpick button:hover{border-color:var(--line-2)}
+.bookpick button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600}
+.bookpick button span{font-size:11px;font-weight:400;color:var(--ink-3)}
+.setting .lnk{font-size:12.5px;color:var(--ink-2)}
+.setting .lnk:hover{color:var(--accent)}
+@media(min-width:768px){
+  .sheet{left:auto;right:22px;bottom:22px;width:390px;border-radius:18px;max-height:calc(100vh - 44px);transform:translateY(14px);opacity:0}
+  .sheet.open{transform:none;opacity:1}
+  .sheet .handle{display:none}
+}
+
+/* ---------- toast ---------- */
+.toast{position:fixed;left:50%;bottom:32px;transform:translate(-50%,16px);background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:10px;font-size:12.5px;display:flex;gap:14px;align-items:center;opacity:0;pointer-events:none;transition:.18s var(--ease);z-index:100;box-shadow:var(--sh-2)}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{color:inherit;opacity:.75;text-decoration:underline;text-underline-offset:3px}
+
+/* ---------- mobile ---------- */
+.mobiletabs{display:none}
+@media(max-width:1100px){
+  .rail{display:none}
+  .view{padding:32px 32px 56px}
+}
+@media(max-width:860px){
+  :root{--side:0px}
+  .sidenav{display:none}
+  .brand{width:auto}
+  .shellbar{padding:0 14px;gap:14px}
+  .search{display:none}
+  .shellbar .streak{display:none}
+  .view{padding:24px 18px 96px;max-width:none}
+  .hero h1{font-size:32px}
+  .wave{display:none}
+  .grid2{grid-template-columns:1fr}
+  .mobiletabs{
+    display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:50;
+    height:calc(58px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);
+    background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(10px);border-top:1px solid var(--line);
+  }
+  .mobiletabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px;color:var(--ink-3)}
+  .mobiletabs button.active{color:var(--accent)}
+  .mobiletabs svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.6}
+  .reader-inner{padding:32px 20px 90px}
+  .reader-inner h1{font-size:28px}
+  .reader-inner p{font-size:17px}
+  .thead,.wrow{grid-template-columns:1.1fr 1fr .8fr}
+  .wrow .p{display:none}
+  .rating button{height:50px;font-size:13px}
+  .todaybar .track{display:none}
+  .todaybar{flex-wrap:wrap}
+  .todaybar .btn{width:100%}
+  .learn-card{padding:34px 22px}
+  .learn-card .word{font-size:36px}
+  .learn-actions button{height:52px;font-size:13px}
+  .learn-done .acts{flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body data-view="today">
+
+<div class="app">
+  <!-- ============ 顶栏 ============ -->
+  <header class="shellbar">
+    <div class="brand">
+      <div class="mark">词</div>
+      <b>词境</b><span>VOCAB</span>
+    </div>
+    <label class="search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.8"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+      <input placeholder="搜索单词、中文释义…" aria-label="全局搜索">
+      <kbd>⌘K</kbd>
+    </label>
+    <div class="right">
+      <div class="streak" title="连续学习天数"><b>12</b> 天</div>
+      <button class="iconbtn" id="themeBtn" aria-label="切换主题" title="切换主题">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.4 1.4M17.6 17.6L19 19M19 5l-1.4 1.4M6.4 17.6L5 19"/></svg>
+      </button>
+      <div class="avatar" aria-hidden="true">Z</div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <!-- ============ 侧栏 ============ -->
+    <aside class="sidenav">
+      <div class="navlabel">学习</div>
+      <button class="navitem active" data-go="today">
+        <svg viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/></svg>
+        今天
+      </button>
+      <button class="navitem" data-go="library">
+        <svg viewBox="0 0 24 24"><path d="M5 4h12a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M9 8h6M9 12h6"/></svg>
+        词库
+      </button>
+      <button class="navitem" data-go="review">
+        <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 1 2.3 5.6"/><path d="M4 20v-5h5"/></svg>
+        复习<span class="badge">12</span>
+      </button>
+      <button class="navitem" data-go="progress">
+        <svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="M8 15l4-5 3 3 5-7"/></svg>
+        进步
+      </button>
+      <div class="navlabel" style="margin-top:18px">账户</div>
+      <button class="navitem" data-go="me">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.3"/><path d="M5 20c0-3.4 3.1-5.8 7-5.8s7 2.4 7 5.8"/></svg>
+        我的
+      </button>
+
+      <div class="push"></div>
+      <div class="bookcard">
+        <div class="row">
+          <div class="ring">
+            <svg width="42" height="42" viewBox="0 0 42 42">
+              <circle cx="21" cy="21" r="17.5" fill="none" stroke="var(--surface-2)" stroke-width="3"/>
+              <circle cx="21" cy="21" r="17.5" fill="none" stroke="var(--accent)" stroke-width="3"
+                stroke-linecap="round" stroke-dasharray="110" stroke-dashoffset="48"/>
+            </svg>
+            <div class="pct">56%</div>
+          </div>
+          <div>
+            <div class="t">CET-6 核心词</div>
+            <div class="s">1,240 / 2,200</div>
+          </div>
+        </div>
+        <div class="foot"><span>本周 +56</span><button data-sheet="plan">换词书</button></div>
+      </div>
+      <p class="tip" style="margin:12px 4px 0">冲刺第 <b>7 / 30</b> 天</p>
+    </aside>
+
+    <!-- ============ 主区 ============ -->
+    <main class="stage" id="stage">
+
+      <!-- 今天 -->
+      <section class="view active" id="view-today">
+        <div class="today">
+          <div class="eyebrow"><i class="line"></i>第 12 天 · 冲刺第 7 / 30 天</div>
+
+          <div class="todaybar">
+            <div class="ic">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M9 9h7M9 13h5"/></svg>
+            </div>
+            <div class="txt">
+              <b>背单词</b><span>CET-6 核心词</span>
+              <div>今天已学 32 / 40 · 还剩 8 个，约 2 分钟</div>
+            </div>
+            <div class="track"><i style="width:80%"></i></div>
+            <button class="btn btn-primary" data-learn>继续背词</button>
+          </div>
+
+          <div class="hero">
+            <svg class="wave" viewBox="0 0 280 118" fill="none" aria-hidden="true">
+              <path d="M0 26c14 0 14 10 28 10s14-18 28-18 14 26 28 26 14-14 28-14 14 8 28 8 14-16 28-16 14 20 28 20 14-8 28-8 14 10 28 10" stroke="var(--accent)" stroke-width="1.4" stroke-opacity=".55"/>
+              <path d="M0 52c16 0 16 12 32 12s16-20 32-20 16 28 32 28 16-16 32-16 16 10 32 10 16-18 32-18 16 22 32 22 16-10 32-10 16 12 32 12" stroke="var(--accent)" stroke-width="1.2" stroke-opacity=".35"/>
+              <path d="M0 78c18 0 18 14 36 14s18-22 36-22 18 30 36 30 18-18 36-18 18 12 36 12 18-20 36-20 18 24 36 24 18-12 36-12 18 14 36 14" stroke="var(--warm)" stroke-width="1.1" stroke-opacity=".3"/>
+            </svg>
+            <h1>Why Cities Sound Quieter at Night</h1>
+            <div class="meta">
+              <span>210 词</span><i></i><span>约 6 分钟</span><i></i>
+              <span>你大概能读懂 <b>95%</b></span><i></i><span>B1</span>
+            </div>
+            <p class="excerpt">
+              Cities are not actually silent at night. They simply trade the noise of daytime for another
+              <span class="hl">frequency</span>. The low hum of air-conditioning units, the distant hiss of
+              tyres, the <span class="hl">compressor</span> behind a fridge — together they form a
+              <span class="hl">sustained</span> layer of <span class="hl">background</span> noise.
+            </p>
+            <div class="cta-row">
+              <button class="btn btn-primary" id="startRead">
+                开始阅读
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+              </button>
+              <div class="cta-note">读完还能补 8 个词<span class="keyhint">空格</span></div>
+            </div>
+          </div>
+
+          <div class="plan">
+            <div class="cap"><b>今日计划</b><span>约 12 分钟 · 3 步</span></div>
+            <div class="steps">
+              <div class="step now" data-step="back">
+                <div class="dot">1</div>
+                <div class="t">背单词<small>今天还剩 8 个 · 每天 40 个</small></div>
+                <div class="r">2 分钟</div>
+              </div>
+              <div class="step" data-step="read">
+                <div class="dot">2</div>
+                <div class="t">读一篇<small>Why Cities Sound Quieter at Night</small></div>
+                <div class="r">6 分钟</div>
+              </div>
+              <div class="step" data-step="review">
+                <div class="dot">3</div>
+                <div class="t">复习 12 个<small>快忘的优先</small></div>
+                <div class="r">4 分钟</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="quickline">
+            <span>只有 3 分钟？先复习 10 个快忘的词</span>
+            <button data-go="review">去复习 →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 词库 -->
+      <section class="view" id="view-library">
+        <div class="pagehead">
+          <div>
+            <h1>词库</h1>
+            <p>2,140 个词 · 生词本 46 · 已掌握 620</p>
+          </div>
+          <button class="btn btn-ghost btn-sm">导入词表</button>
+        </div>
+
+        <div class="toolbar">
+          <label class="searchbox">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.8"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+            <input id="searchInput" placeholder="搜索单词或中文…" aria-label="搜索单词">
+          </label>
+        </div>
+
+        <div class="tabs" id="libTabs" role="tablist">
+          <button class="active" data-tab="all">全部</button>
+          <button data-tab="bookmark">生词本</button>
+          <button data-tab="known">已掌握</button>
+        </div>
+
+        <div class="chips">
+          <button class="chip on">在学</button>
+          <button class="chip">四六级</button>
+          <button class="chip">技术</button>
+        </div>
+
+        <div class="bookcard-wide">
+          <div style="flex:1">
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <b>CET-6 核心词</b><span style="font-size:12px;color:var(--ink-3)">1,240 / 2,200</span>
+            </div>
+            <div class="track"><i style="width:56%"></i></div>
+          </div>
+          <button class="btn btn-primary btn-sm btn-learn" data-learn>开始背词</button>
+          <button class="btn btn-ghost btn-sm" data-sheet="plan">换词书</button>
+        </div>
+
+        <div class="table">
+          <div class="thead"><div>单词</div><div>音标</div><div>释义</div><div style="text-align:right">下次复习</div></div>
+          <div id="wordList"></div>
+        </div>
+      </section>
+
+      <!-- 复习 -->
+      <section class="view" id="view-review">
+        <div class="reviewhead">
+          <span>今天的复习 · 12 个词</span>
+          <span id="reviewLeft">还剩 3</span>
+        </div>
+        <div class="review-stage" id="reviewStage">
+          <div class="review-card">
+            <div class="word" id="rvWord">ambient</div>
+            <div class="phon" id="rvPhon">/ˈæmbiənt/ · 🔊</div>
+            <div class="hint" id="rvHint">第 3 次见面 · 距上次 6 天</div>
+            <div class="back" id="rvBack" hidden>
+              <div class="meaning" id="rvMeaning"></div>
+              <div class="example" id="rvExample"></div>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="revealBtn" style="width:200px;margin-top:18px">看答案</button>
+          <div class="rating" id="rating" hidden>
+            <button data-grade="1" disabled>忘了<small>明天再见</small></button>
+            <button data-grade="3" disabled>有印象<small>6 天后</small></button>
+            <button data-grade="5" disabled>记得<small>21 天后</small></button>
+          </div>
+        </div>
+        <div class="review-stage" id="reviewEmpty" hidden>
+          <div style="text-align:center">
+            <div style="font-size:22px;font-weight:600;margin-bottom:8px">今天的复习清完了。</div>
+            <p style="font-size:12.5px;color:var(--ink-3)">12 个词 · 用时 5 分 40 秒</p>
+            <div class="center-actions">
+              <button class="btn btn-ghost btn-sm" id="practiceMore">再练 10 个</button>
+              <button class="btn btn-primary btn-sm" data-go="today">回今天</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 进步 -->
+      <section class="view" id="view-progress">
+        <div class="pagehead">
+          <div><h1>进步</h1><p>按已掌握的词在真实文本中的覆盖计算，每月校准一次</p></div>
+        </div>
+        <div class="grid2">
+          <div class="card">
+            <div class="cap">你能读懂一般文章的</div>
+            <div class="hero-num">82.4%</div>
+            <div class="delta">↑ 本周 +0.6</div>
+            <svg class="sparkline" viewBox="0 0 320 44" preserveAspectRatio="none" aria-hidden="true">
+              <polyline points="0,35 36,32 72,33 108,28 144,25 180,22 216,20 252,17 288,14 320,11"
+                fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="forecast">按现在的速度，四周后大约 85%。</div>
+            <details class="more">
+              <summary>哪些能力在变化</summary>
+              <div class="body">
+                <div class="gapbar"><span>认识</span><div class="t"><i style="width:86%"></i></div><span class="v">稳</span></div>
+                <div class="gapbar"><span>会写</span><div class="t"><i style="width:54%"></i></div><span class="v">在进步</span></div>
+                <div class="gapbar"><span>会用</span><div class="t"><i style="width:38%"></i></div><span class="v">需加强</span></div>
+              </div>
+            </details>
+          </div>
+          <div class="card">
+            <div class="cap">待补的 10 个词</div>
+            <div class="chiprow" style="margin-top:12px">
+              <span class="chipw">ambient</span><span class="chipw">threshold</span><span class="chipw">mitigate</span>
+              <span class="chipw">resilient</span><span class="chipw">coherent</span><span class="chipw">subtle</span>
+              <span class="chipw">momentum</span><span class="chipw">eliminate</span><span class="chipw">obscure</span>
+              <span class="chipw">undergo</span>
+            </div>
+            <div class="forecast">这周学了 8 篇，64 个新词，其中 41 个已经能再认。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 我的 -->
+      <section class="view" id="view-me">
+        <div class="pagehead">
+          <div><h1>我的</h1><p>目标：读懂技术文档 · 冲刺第 7 / 30 天</p></div>
+        </div>
+        <div class="grid2">
+          <div class="card">
+            <div class="cap">学习</div>
+            <div class="setting"><span>词书</span><button class="lnk" data-sheet="plan">CET-6 核心词 ›</button></div>
+            <div class="setting"><span>每天新词</span><span style="color:var(--ink-2)">40 个</span></div>
+            <div class="setting"><span>每天时长</span>
+              <select id="minutesSel" aria-label="每天时长"><option>10 分钟</option><option selected>20 分钟</option><option>30 分钟</option></select>
+            </div>
+            <div class="setting"><span>模式</span><span style="color:var(--ink-2)">冲刺 · 第 7 / 30 天</span></div>
+            <div class="setting"><span>提醒</span><span style="color:var(--ink-2)">每天 20:30</span></div>
+          </div>
+          <div class="card">
+            <div class="cap">阅读</div>
+            <div class="setting"><span>字号</span>
+              <select id="sizeSel" aria-label="字号"><option value="sm">小</option><option value="md" selected>标准</option><option value="lg">大</option></select>
+            </div>
+            <div class="setting"><span>行距</span>
+              <select id="leadSel" aria-label="行距"><option value="std" selected>标准</option><option value="wide">宽松</option></select>
+            </div>
+            <div class="setting"><span>主题</span>
+              <select id="themeSel" aria-label="主题"><option value="paper" selected>纸色</option><option value="white">纯白</option><option value="night">夜间</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="sectionlabel">数据</div>
+        <div class="card">
+          <div class="setting"><span>导出 CSV</span><span style="color:var(--ink-3)">›</span></div>
+          <div class="setting danger"><span>清除学习记录</span><span style="color:inherit">›</span></div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ============ 右侧栏 ============ -->
+    <aside class="rail">
+      <div class="railcard">
+        <div class="cap">待复习</div>
+        <div class="big">12<small>个 · 约 4 分钟</small></div>
+        <div class="chiprow">
+          <span class="chipw">threshold</span><span class="chipw">ambient</span><span class="chipw">mitigate</span>
+        </div>
+        <button class="btn-mini" data-go="review">开始复习</button>
+      </div>
+      <div class="railcard">
+        <div class="cap">本周读懂率</div>
+        <div class="big">82.4<small>%</small></div>
+        <svg class="sparkline" viewBox="0 0 240 44" preserveAspectRatio="none" aria-hidden="true">
+          <polyline points="0,34 24,31 48,32 72,27 96,25 120,22 144,20 168,17 192,16 216,13 240,11"
+            fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="delta">↑ 本周 +0.6</div>
+      </div>
+      <div class="railcard">
+        <div class="cap">今日提示</div>
+        <p class="tip">读的时候点一下带下划线的词，释义会出现在旁边，<b>不会打断这一句</b>。</p>
+      </div>
+      <p class="tip" style="margin-top:auto">⌘K 搜索 · Esc 关闭浮层<br>复习时用 1 / 2 / 3 评分</p>
+    </aside>
+  </div>
+</div>
+
+<!-- ============ 阅读器 ============ -->
+<div class="reader" id="reader">
+  <div class="reader-top">
+    <button class="iconbtn" id="closeRead" aria-label="返回">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="mid">
+      <span class="pill">第 1 段 / 6</span>
+      <span>210 词 · 约 6 分钟</span>
+    </div>
+    <button class="iconbtn" id="typeBtn" aria-label="排版设置" style="font-family:var(--font-read);font-weight:600;font-size:15px">Aa</button>
+  </div>
+  <div class="reader-progress"><i id="progressFill"></i></div>
+
+  <div class="reader-scroll" id="readerScroll">
+    <div class="reader-inner">
+      <article class="reading" id="articleBody">
+        <h1>Why Cities Sound Quieter at Night</h1>
+        <div class="byline"><span>B1 · 说明文</span><i></i><span>8 个目标词</span></div>
+
+        <p>Cities are not actually silent at night. They simply trade the noise of daytime for another <span class="target" data-word="frequency">frequency</span>. The low hum of air-conditioning units, the distant hiss of tyres on a motorway, the <span class="target" data-word="compressor">compressor</span> behind a convenience-store fridge — none of these sounds is harsh on its own. Together they form a <span class="target" data-word="sustained">sustained</span> layer of <span class="target" data-word="background">background</span> noise.</p>
+
+        <p>Researchers call this the urban <span class="target" data-word="ambient">ambient</span> soundscape. Unlike a sudden horn, it is rarely <span class="target" data-word="noticeable">noticeable</span>, so most people stop hearing it within a few weeks. That adaptation is useful in the short term. In the long term, however, constant <span class="target" data-word="exposure">exposure</span> keeps the nervous system slightly alert, and it becomes harder to <span class="target" data-word="concentrate">concentrate</span> on a book or fall asleep.</p>
+
+        <p>The effect is not evenly spread. People who live near main roads absorb more low-frequency sound than those on quiet side streets, and the difference shows up in sleep studies. A recent survey found that residents of noisy blocks fell asleep about twenty minutes later on average, even when they reported feeling used to the sound.</p>
+
+        <p>What helps is not silence but contrast. A small fountain, a line of trees, or a bedroom facing a courtyard can break the steady layer into irregular pieces. The brain notices change far more easily than constant pressure, and that small variation is often enough to let attention settle.</p>
+
+        <p>So the next time a city night feels calm, it may be worth listening more carefully. The quiet is not the absence of sound. It is a texture we have learned to stop noticing — and one we can still decide to change.</p>
+      </article>
+
+      <div class="reader-foot" id="readFoot">
+        <button class="btn btn-ghost" id="listenBtn" style="width:120px">听全文</button>
+        <button class="btn btn-primary" id="finishRead">读完了</button>
+      </div>
+
+      <section class="inline-panel" id="quizPanel" hidden>
+        <div class="q-step" id="qStep">第 1 题 / 共 3 题</div>
+        <div class="q-text" id="qText"></div>
+        <div class="opts" id="qOpts"></div>
+        <div class="opt-note" id="qNote" hidden></div>
+        <div class="q-actions">
+          <button class="link" id="skipQuiz">跳过</button>
+          <button class="btn btn-primary btn-sm" id="nextQ" disabled>下一题</button>
+        </div>
+      </section>
+
+      <section class="recall" id="recallPanel" hidden>
+        <div class="dots" id="recallDots"></div>
+        <div class="word" id="recallWord">ambient</div>
+        <div class="phon" id="recallPhon">/ˈæmbiənt/</div>
+        <div class="btns">
+          <button class="btn btn-ghost" data-rec="0">不认识</button>
+          <button class="btn btn-primary" data-rec="1">认识</button>
+        </div>
+      </section>
+
+      <section class="done-bar" id="doneBar" hidden>
+        <div class="line1">今天读完了。</div>
+        <div class="stat">读懂率 <b>82.4%</b> → <b>82.7%</b><br>这篇你少查了 <b>9</b> 次词典。</div>
+        <div class="done-actions">
+          <button class="btn btn-ghost" data-go="today">回今天</button>
+          <button class="btn btn-primary" id="readAnother">再读一篇</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 背单词会话（基础模式） ============ -->
+<div class="learn" id="learn" role="dialog" aria-modal="true" aria-label="背单词">
+  <div class="learn-top">
+    <button class="iconbtn" id="closeLearn" aria-label="退出">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="mid"><b>背单词</b><span>CET-6 核心词 · 每天 40 个</span></div>
+    <div class="count" id="learnCount">32 / 40</div>
+  </div>
+  <div class="learn-bar"><i id="learnFill" style="width:80%"></i></div>
+
+  <div class="learn-scroll">
+    <div class="learn-inner">
+      <div class="learn-card" id="learnCard">
+        <div class="word" id="lwWord">threshold</div>
+        <div class="phon"><span id="lwPhon">/ˈθreʃhəʊld/</span><button id="lwAudio" aria-label="播放发音">🔊</button></div>
+        <button class="btn btn-ghost btn-sm" id="lwReveal" style="margin-top:30px">显示释义</button>
+        <div class="body" id="lwBody" hidden>
+          <div class="meaning" id="lwMeaning"></div>
+          <div class="ex" id="lwEx"></div>
+          <div class="ex-cn" id="lwExCn"></div>
+          <div class="note" id="lwNote"></div>
+          <div class="again" id="lwAgain"></div>
+        </div>
+      </div>
+
+      <div class="learn-actions" id="lwActions" hidden>
+        <button data-lg="0">不认识<small>明天再见</small></button>
+        <button data-lg="2">模糊<small>2 天后</small></button>
+        <button data-lg="4">认识<small>6 天后</small></button>
+      </div>
+      <div class="learn-meta" id="learnMeta"><span id="lwMeta">今天第 33 个</span><span id="lwHint">空格显示释义</span></div>
+
+      <div class="learn-done" id="learnDone" hidden>
+        <div class="h">今天的 40 个背完了。</div>
+        <div class="s">用时 21 分钟 · 8 个词<br>其中 6 个会在这周的 3 篇文章里再出现</div>
+        <div class="acts">
+          <button class="btn btn-ghost" id="learnAgain">再背一组</button>
+          <button class="btn btn-primary" id="learnRead">接着读一篇</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 移动端标签 ============ -->
+<nav class="mobiletabs" aria-label="底部导航">
+  <button class="active" data-go="today"><svg viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/></svg>今天</button>
+  <button data-go="library"><svg viewBox="0 0 24 24"><path d="M5 4h12a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M9 8h6M9 12h6"/></svg>词库</button>
+  <button data-go="review"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 1 2.3 5.6"/><path d="M4 20v-5h5"/></svg>复习</button>
+  <button data-go="me"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.3"/><path d="M5 20c0-3.4 3.1-5.8 7-5.8s7 2.4 7 5.8"/></svg>我的</button>
+</nav>
+
+<div class="scrim" id="scrim"></div>
+
+<!-- 词卡 -->
+<div class="sheet" id="wordSheet" role="dialog" aria-modal="true" aria-label="单词卡片">
+  <button class="close" id="sheetClose" aria-label="关闭">✕</button>
+  <div class="handle"></div>
+  <h3 id="wsWord">ambient</h3>
+  <div class="phon" id="wsPhon">/ˈæmbiənt/ <span>🔊</span></div>
+  <div class="meaning" id="wsMeaning">周围的、环境中的</div>
+  <div class="ctx" id="wsCtx">本文中：the urban ambient soundscape（城市环境声景）</div>
+  <button class="btn btn-primary" id="bookmarkBtn" style="width:100%">＋ 加入生词本</button>
+</div>
+
+<!-- 排版 -->
+<div class="sheet" id="typeSheet" role="dialog" aria-modal="true" aria-label="阅读设置">
+  <button class="close" id="typeClose" aria-label="关闭">✕</button>
+  <div class="handle"></div>
+  <h3 style="font-size:16px;font-family:var(--font-ui);margin-bottom:4px">阅读设置</h3>
+  <div class="group"><h4>字号</h4>
+    <div class="seg" id="sizeSeg"><button data-size="sm">小</button><button data-size="md" class="on">标准</button><button data-size="lg">大</button></div>
+  </div>
+  <div class="group"><h4>行距</h4>
+    <div class="seg" id="leadSeg"><button data-lead="std" class="on">标准</button><button data-lead="wide">宽松</button></div>
+  </div>
+  <div class="group"><h4>主题</h4>
+    <div class="seg" id="themeSeg"><button data-theme="paper" class="on">纸色</button><button data-theme="white">纯白</button><button data-theme="night">夜间</button></div>
+  </div>
+</div>
+
+<!-- 词书与计划 -->
+<div class="sheet" id="planSheet" role="dialog" aria-modal="true" aria-label="词书与计划">
+  <button class="close" id="planClose" aria-label="关闭">✕</button>
+  <div class="handle"></div>
+  <h3 style="font-size:16px;font-family:var(--font-ui);margin-bottom:4px">词书与计划</h3>
+  <p style="font-size:12px;color:var(--ink-3);margin:0 0 20px">换词书不会清空已学记录。</p>
+  <div class="group" style="border-top:none;margin-top:0;padding-top:0">
+    <h4>词书</h4>
+    <div class="bookpick" id="bookPick">
+      <button>四级核心词<span>3,600 词</span></button>
+      <button class="on">六级核心词<span>2,200 词</span></button>
+      <button>考研大纲词<span>5,500 词</span></button>
+      <button>雅思学术词<span>4,000 词</span></button>
+    </div>
+  </div>
+  <div class="group"><h4>每天新词</h4>
+    <div class="seg" id="dailySeg">
+      <button data-daily="20">20 个</button><button data-daily="40" class="on">40 个</button><button data-daily="60">60 个</button>
+    </div>
+  </div>
+  <div class="group"><h4>复习强度</h4>
+    <div class="seg" id="reviewSeg">
+      <button data-rv="60">轻松</button><button data-rv="120" class="on">标准</button><button data-rv="200">高强度</button>
+    </div>
+  </div>
+  <button class="btn btn-primary" id="planSave" style="width:100%;margin-top:22px">保存</button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+const WORDS = {
+  frequency:{phon:"/ˈfriːkwənsi/",meaning:"频率",ctx:"本文中：trade daytime noise for another frequency（换成另一种频率）"},
+  compressor:{phon:"/kəmˈpresə/",meaning:"压缩机",ctx:"本文中：the compressor behind a fridge（冰柜背后的压缩机）"},
+  sustained:{phon:"/səˈsteɪnd/",meaning:"持续的、不间断的",ctx:"本文中：a sustained layer of noise（持续的一层噪音）"},
+  background:{phon:"/ˈbækɡraʊnd/",meaning:"背景（的）",ctx:"本文中：background noise（背景噪音）"},
+  ambient:{phon:"/ˈæmbiənt/",meaning:"周围的、环境中的",ctx:"本文中：the urban ambient soundscape（城市环境声景）"},
+  noticeable:{phon:"/ˈnəʊtɪsəbl/",meaning:"明显的、容易被注意到的",ctx:"本文中：it is rarely noticeable（它很少被注意到）"},
+  exposure:{phon:"/ɪkˈspəʊʒə/",meaning:"暴露、接触",ctx:"本文中：constant exposure（持续接触）"},
+  concentrate:{phon:"/ˈkɒnsntreɪt/",meaning:"集中注意力",ctx:"本文中：harder to concentrate（更难集中注意力）"}
+};
+const QUIZ = [
+  {q:"作者认为城市夜晚「安静」的实际原因是什么？",opts:["夜里车流明显减少","噪音换成了持续的背景声","人们已经习惯噪音","建筑隔音变好了"],a:1,note:"文章说城市只是把白天的噪音换成了另一种频率，并不是真的变安静。"},
+  {q:"「城市环境声」和鸣笛的主要区别是？",opts:["响度更低","出现得更晚","不明显，因此容易被忽略","只在冬天出现"],a:2,note:"它不像鸣笛那样突然，所以很少被注意到，但长期接触仍会影响注意力。"},
+  {q:"文中提出的缓解办法是？",opts:["搬到安静的街区","戴耳塞睡觉","用不规则的声景打破持续噪音","把窗户换成双层玻璃"],a:2,note:"文章强调的不是彻底安静，而是用喷泉、树木、院子制造变化与对比。"}
+];
+const RECALL = Object.keys(WORDS);
+const LIB = [
+  {w:"ambient",phon:"/ˈæmbiənt/",m:"周围的",due:"3 天后",s:"learning"},
+  {w:"threshold",phon:"/ˈθreʃhəʊld/",m:"门槛",due:"明天",s:"learning"},
+  {w:"mitigate",phon:"/ˈmɪtɪɡeɪt/",m:"减轻",due:"5 天后",s:"learning"},
+  {w:"resilient",phon:"/rɪˈzɪliənt/",m:"有韧性的",due:"—",s:"bookmark"},
+  {w:"coherent",phon:"/kəʊˈhɪərənt/",m:"连贯的",due:"—",s:"bookmark"},
+  {w:"eliminate",phon:"/ɪˈlɪmɪneɪt/",m:"消除",due:"已掌握",s:"known"},
+  {w:"subtle",phon:"/ˈsʌtl/",m:"微妙的",due:"已掌握",s:"known"},
+  {w:"momentum",phon:"/məˈmentəm/",m:"势头",due:"12 天后",s:"learning"}
+];
+const REVIEW = [
+  {w:"ambient",phon:"/ˈæmbiənt/",hint:"第 3 次见面 · 距上次 6 天",m:"周围的、环境中的",ex:"the urban ambient soundscape"},
+  {w:"threshold",phon:"/ˈθreʃhəʊld/",hint:"第 2 次见面 · 距上次 3 天",m:"门槛、临界值",ex:"the threshold of hearing"},
+  {w:"mitigate",phon:"/ˈmɪtɪɡeɪt/",hint:"第 4 次见面 · 距上次 11 天",m:"减轻、缓和",ex:"to mitigate the effect of noise"}
+];
+const LEARN = [
+  {w:"threshold",phon:"/ˈθreʃhəʊld/",pos:"n.",m:"门槛；临界值",ex:"The hum was just above the threshold of hearing.",cn:"那阵低鸣刚好在听觉阈值之上。",note:"搭配：cross the threshold 跨过门槛",again:"这个词会在这周的 3 篇文章里再出现"},
+  {w:"mitigate",phon:"/ˈmɪtɪɡeɪt/",pos:"v.",m:"减轻，缓和",ex:"Trees can mitigate the effect of traffic noise.",cn:"树木可以减轻交通噪音的影响。",note:"近义：ease / reduce",again:"这个词会在这周的 2 篇文章里再出现"},
+  {w:"resilient",phon:"/rɪˈzɪliənt/",pos:"adj.",m:"有韧性的；能恢复的",ex:"Children are often more resilient than adults.",cn:"孩子的恢复能力常常比成人强。",note:"名词：resilience 韧性",again:"明天再认一次"},
+  {w:"coherent",phon:"/kəʊˈhɪərənt/",pos:"adj.",m:"连贯的、条理清楚的",ex:"She gave a coherent account of the accident.",cn:"她对事故做了条理清楚的陈述。",note:"反义：incoherent",again:"明天再认一次"},
+  {w:"subtle",phon:"/ˈsʌtl/",pos:"adj.",m:"微妙的、不易察觉的",ex:"There is a subtle difference between the two words.",cn:"这两个词之间有微妙的差别。",note:"注意 b 不发音",again:"这个词会在这周的 2 篇文章里再出现"},
+  {w:"momentum",phon:"/məˈmentəm/",pos:"n.",m:"势头，推动力",ex:"The campaign is gaining momentum.",cn:"这场运动正在获得势头。",note:"搭配：gain / lose momentum",again:"明天再认一次"},
+  {w:"eliminate",phon:"/ɪˈlɪmɪneɪt/",pos:"v.",m:"消除，排除",ex:"The filter eliminates most of the dust.",cn:"这个滤网能去掉大部分灰尘。",note:"搭配：eliminate A from B",again:"这个词会在这周的 1 篇文章里再出现"},
+  {w:"obscure",phon:"/əbˈskjʊə/",pos:"adj.",m:"模糊的；鲜为人知的",ex:"The origin of the word is obscure.",cn:"这个词的来源已经不清楚了。",note:"反义：clear / well-known",again:"明天再认一次"}
+];
+
+let quizIndex = 0, quizPick = null, recallIndex = 0;
+let learnIndex = 0, learnRevealed = false;
+let reviewIndex = 0, revealed = false;
+const bookmarked = new Set();
+let lastFocus = null;
+
+/* ---------- 导航 ---------- */
+function show(view){
+  $$(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + view));
+  document.body.dataset.view = view;
+  $$(".navitem,.mobiletabs button").forEach(b => b.classList.toggle("active", b.dataset.go === view));
+  $("#stage").scrollTop = 0;
+  history.replaceState(null, "", "#" + view);
+  if (view === "review") renderReview();
+  if (view === "library") renderLibrary();
+  if (view === "read") document.body.dataset.view = "read";
+}
+document.addEventListener("click", e => {
+  const go = e.target.closest("[data-go]");
+  if (go){ e.preventDefault(); show(go.dataset.go); return; }
+  const learn = e.target.closest("[data-learn]");
+  if (learn){ e.preventDefault(); openLearn(); return; }
+  const sheet = e.target.closest("[data-sheet]");
+  if (sheet){ e.preventDefault(); openSheet(sheet.dataset.sheet); }
+});
+
+/* ---------- 阅读流 ---------- */
+function openReader(){
+  resetRead();
+  show("read");
+}
+$("#startRead").onclick = openReader;
+$("#closeRead").onclick = () => show("today");
+$("#readAnother").onclick = () => { resetRead(); $("#readerScroll").scrollTop = 0; };
+
+function resetRead(){
+  quizIndex = 0; quizPick = null; recallIndex = 0;
+  $("#quizPanel").hidden = true;
+  $("#recallPanel").hidden = true;
+  $("#doneBar").hidden = true;
+  $("#readFoot").hidden = false;
+  $("#articleBody").hidden = false;
+  $$(".target").forEach(t => t.classList.remove("seen"));
+  $("#readerScroll").scrollTop = 0;
+}
+$("#finishRead").onclick = () => startQuiz();
+$("#skipQuiz").onclick = () => startRecall();
+
+function startQuiz(){
+  $("#readFoot").hidden = true;
+  $("#quizPanel").hidden = false;
+  $("#doneBar").hidden = true;
+  renderQuestion();
+  $("#quizPanel").scrollIntoView({behavior:"smooth", block:"start"});
+}
+function renderQuestion(){
+  quizPick = null;
+  const item = QUIZ[quizIndex];
+  $("#qStep").textContent = `第 ${quizIndex + 1} 题 / 共 ${QUIZ.length} 题`;
+  $("#qText").textContent = item.q;
+  $("#qNote").hidden = true;
+  $("#nextQ").disabled = true;
+  $("#nextQ").textContent = quizIndex === QUIZ.length - 1 ? "继续" : "下一题";
+  $("#qOpts").innerHTML = item.opts.map((o,i) =>
+    `<button class="opt" data-opt="${i}" aria-pressed="false"><span class="mark"></span><span>${o}</span></button>`).join("");
+  $$("#qOpts .opt").forEach(btn => btn.onclick = () => {
+    $$("#qOpts .opt").forEach(b => { b.setAttribute("aria-pressed","false"); b.querySelector(".mark").textContent = ""; });
+    btn.setAttribute("aria-pressed","true");
+    btn.querySelector(".mark").textContent = "✓";
+    quizPick = +btn.dataset.opt;
+    $("#nextQ").disabled = false;
+  });
+}
+$("#nextQ").onclick = () => {
+  const item = QUIZ[quizIndex];
+  if (quizPick !== null && quizPick !== item.a){
+    $("#qNote").hidden = false;
+    $("#qNote").textContent = item.note;
+    if (!$("#nextQ").dataset.warned){ $("#nextQ").dataset.warned = "1"; return; }
+  }
+  delete $("#nextQ").dataset.warned;
+  quizIndex++;
+  if (quizIndex < QUIZ.length) renderQuestion(); else startRecall();
+};
+
+function startRecall(){
+  $("#quizPanel").hidden = true;
+  $("#readFoot").hidden = true;
+  $("#recallPanel").hidden = false;
+  $("#recallDots").innerHTML = RECALL.map((_,i) => `<i class="${i < recallIndex ? "on" : ""}"></i>`).join("");
+  renderRecall();
+  $("#recallPanel").scrollIntoView({behavior:"smooth", block:"center"});
+}
+function renderRecall(){
+  $("#recallWord").textContent = RECALL[recallIndex];
+  $("#recallPhon").textContent = WORDS[RECALL[recallIndex]].phon;
+  $$("#recallDots i").forEach((d,i) => d.classList.toggle("on", i < recallIndex));
+}
+$$("[data-rec]").forEach(b => b.onclick = () => {
+  recallIndex++;
+  if (recallIndex < RECALL.length) renderRecall(); else finishSession();
+});
+function finishSession(){
+  $("#recallPanel").hidden = true;
+  $("#doneBar").hidden = false;
+  $("#doneBar").scrollIntoView({behavior:"smooth", block:"center"});
+  $$(".step").forEach(s => s.classList.remove("now"));
+  const step = document.querySelector('.step[data-step="read"]');
+  if (step) step.classList.add("done");
+  $("#startRead").textContent = "再读一篇";
+}
+
+/* ---------- 背单词（基础模式） ---------- */
+function openLearn(){
+  learnIndex = 0;
+  $("#learnCard").hidden = false;
+  $("#lwActions").hidden = true;
+  $("#learnMeta").hidden = false;
+  $("#learnDone").hidden = true;
+  renderLearn();
+  show("learn");
+}
+function renderLearn(){
+  const item = LEARN[learnIndex];
+  learnRevealed = false;
+  $("#learnCard").classList.remove("open");
+  $("#lwWord").textContent = item.w;
+  $("#lwPhon").textContent = item.phon;
+  $("#lwBody").hidden = true;
+  $("#lwReveal").hidden = false;
+  $("#lwActions").hidden = true;
+  $("#lwMeta").textContent = `今天第 ${33 + learnIndex} 个`;
+  $("#lwHint").textContent = "空格显示释义";
+  $("#learnCount").textContent = `${32 + learnIndex} / 40`;
+  $("#learnFill").style.width = ((32 + learnIndex) / 40 * 100) + "%";
+}
+$("#lwReveal").onclick = () => {
+  const item = LEARN[learnIndex];
+  $("#lwMeaning").innerHTML = `<em>${item.pos}</em>${item.m}`;
+  $("#lwEx").textContent = item.ex;
+  $("#lwExCn").textContent = item.cn;
+  $("#lwNote").textContent = item.note;
+  $("#lwAgain").textContent = item.again;
+  $("#lwBody").hidden = false;
+  $("#lwReveal").hidden = true;
+  $("#lwActions").hidden = false;
+  $("#learnCard").classList.add("open");
+  $("#lwHint").textContent = "1 / 2 / 3 评分";
+  learnRevealed = true;
+};
+$("#learnCard").onclick = e => {
+  if (!$("#lwReveal").hidden && e.target.tagName !== "BUTTON") $("#lwReveal").click();
+};
+$("#lwAudio").onclick = () => toast("播放发音 · " + LEARN[learnIndex].w);
+$$("#lwActions button").forEach(b => b.onclick = () => {
+  learnIndex++;
+  if (learnIndex >= LEARN.length) finishLearn(); else renderLearn();
+});
+function finishLearn(){
+  $("#learnCard").hidden = true;
+  $("#lwActions").hidden = true;
+  $("#learnMeta").hidden = true;
+  $("#learnDone").hidden = false;
+  $("#learnCount").textContent = "40 / 40";
+  $("#learnFill").style.width = "100%";
+  const step = document.querySelector('.step[data-step="back"]');
+  if (step){ step.classList.remove("now"); step.classList.add("done"); }
+  const bar = $(".todaybar");
+  if (bar){
+    bar.querySelector(".txt div").textContent = "今天 40 / 40 · 今天的词背完了";
+    bar.querySelector(".track i").style.width = "100%";
+    bar.querySelector("[data-learn]").textContent = "再背一组";
+  }
+}
+$("#closeLearn").onclick = () => show("today");
+$("#learnAgain").onclick = openLearn;
+$("#learnRead").onclick = openReader;
+
+/* 词书与计划 */
+function openSheet(name){
+  const el = $("#" + name + "Sheet");
+  if (!el) return;
+  el.classList.add("open");
+  $("#scrim").classList.add("open");
+}
+$$("#bookPick button").forEach(b => b.onclick = () =>
+  $$("#bookPick button").forEach(x => x.classList.toggle("on", x === b)));
+$$("#dailySeg button").forEach(b => b.onclick = () =>
+  $$("#dailySeg button").forEach(x => x.classList.toggle("on", x === b)));
+$$("#reviewSeg button").forEach(b => b.onclick = () =>
+  $$("#reviewSeg button").forEach(x => x.classList.toggle("on", x === b)));
+$("#planSave").onclick = () => {
+  const book = $("#bookPick button.on")?.textContent.replace(/\s+/g, " ").trim() || "六级核心词";
+  closeSheets();
+  toast("已保存 · " + book);
+};
+$("#planClose").onclick = closeSheets;
+
+/* 阅读进度 */
+$("#readerScroll").addEventListener("scroll", e => {
+  const el = e.target;
+  const max = el.scrollHeight - el.clientHeight;
+  $("#progressFill").style.width = Math.min(100, Math.max(0, el.scrollTop / Math.max(1,max) * 100)) + "%";
+});
+
+/* ---------- 词卡 ---------- */
+function openWord(key){
+  const w = WORDS[key];
+  if (!w) return;
+  lastFocus = document.activeElement;
+  $("#wsWord").textContent = key;
+  $("#wsPhon").innerHTML = `${w.phon} <span>🔊</span>`;
+  $("#wsMeaning").textContent = w.meaning;
+  $("#wsCtx").textContent = w.ctx;
+  syncBookmark(key);
+  $("#wordSheet").classList.add("open");
+  $("#scrim").classList.add("open");
+  document.querySelector(`.target[data-word="${key}"]`)?.classList.add("seen");
+  setTimeout(() => $("#bookmarkBtn").focus(), 140);
+}
+function syncBookmark(key){
+  const on = bookmarked.has(key);
+  $("#bookmarkBtn").textContent = on ? "✓ 已在生词本" : "＋ 加入生词本";
+  $("#bookmarkBtn").style.background = on ? "var(--surface-2)" : "";
+  $("#bookmarkBtn").style.color = on ? "var(--ink-2)" : "";
+}
+$$(".target").forEach(t => t.onclick = () => openWord(t.dataset.word));
+$("#bookmarkBtn").onclick = () => {
+  const k = $("#wsWord").textContent;
+  bookmarked.has(k) ? bookmarked.delete(k) : bookmarked.add(k);
+  syncBookmark(k);
+  toast(bookmarked.has(k) ? "已加入生词本" : "已移出生词本");
+};
+function closeSheets(){
+  $("#wordSheet").classList.remove("open");
+  $("#typeSheet").classList.remove("open");
+  $("#planSheet").classList.remove("open");
+  $("#scrim").classList.remove("open");
+  lastFocus?.focus();
+}
+$("#sheetClose").onclick = closeSheets;
+$("#typeClose").onclick = closeSheets;
+$("#scrim").onclick = closeSheets;
+$("#typeBtn").onclick = () => {
+  $("#typeSheet").classList.add("open");
+  $("#scrim").classList.add("open");
+};
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeSheets();
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k"){ e.preventDefault(); $(".search input")?.focus(); }
+  if (document.body.dataset.view === "review" && revealed){
+    if (e.key === "1") grade(1);
+    if (e.key === "2") grade(3);
+    if (e.key === "3") grade(5);
+  }
+  if (document.body.dataset.view === "learn"){
+    if (e.key === " " && !$("#lwReveal").hidden){ e.preventDefault(); $("#lwReveal").click(); }
+    if (learnRevealed && ["1","2","3"].includes(e.key)) $$("#lwActions button")[+e.key - 1].click();
+  }
+});
+
+/* ---------- 偏好 ---------- */
+const PREFS = JSON.parse(localStorage.getItem("ev-prefs") || "{}");
+function applyPrefs(){
+  const size = PREFS.size || "md", lead = PREFS.lead || "std", theme = PREFS.theme || "paper";
+  document.documentElement.style.setProperty("--read-size", {sm:"17px",md:"20px",lg:"23px"}[size]);
+  document.documentElement.style.setProperty("--leading", lead === "wide" ? "2.1" : "1.9");
+  document.documentElement.dataset.theme = theme;
+  $("#sizeSel").value = size; $("#leadSel").value = lead; $("#themeSel").value = theme;
+  $$("#sizeSeg button").forEach(b => b.classList.toggle("on", b.dataset.size === size));
+  $$("#leadSeg button").forEach(b => b.classList.toggle("on", b.dataset.lead === lead));
+  $$("#themeSeg button").forEach(b => b.classList.toggle("on", b.dataset.theme === theme));
+}
+function setPref(k, v){ PREFS[k] = v; localStorage.setItem("ev-prefs", JSON.stringify(PREFS)); applyPrefs(); }
+$$("#sizeSeg button").forEach(b => b.onclick = () => setPref("size", b.dataset.size));
+$$("#leadSeg button").forEach(b => b.onclick = () => setPref("lead", b.dataset.lead));
+$$("#themeSeg button").forEach(b => b.onclick = () => setPref("theme", b.dataset.theme));
+$("#sizeSel").onchange = e => setPref("size", e.target.value);
+$("#leadSel").onchange = e => setPref("lead", e.target.value);
+$("#themeSel").onchange = e => setPref("theme", e.target.value);
+$("#themeBtn").onclick = () => {
+  const order = ["paper","white","night"];
+  const next = order[(order.indexOf(PREFS.theme || "paper") + 1) % 3];
+  setPref("theme", next);
+  toast({paper:"纸色主题",white:"纯白主题",night:"夜间主题"}[next]);
+};
+
+/* ---------- 复习 ---------- */
+function renderReview(){
+  const done = reviewIndex >= REVIEW.length;
+  $("#reviewEmpty").hidden = !done;
+  $("#reviewStage").hidden = done;
+  if (done) return;
+  const c = REVIEW[reviewIndex];
+  revealed = false;
+  $("#rvWord").textContent = c.w;
+  $("#rvPhon").textContent = c.phon + " · 🔊";
+  $("#rvHint").textContent = c.hint;
+  $("#rvBack").hidden = true;
+  $("#revealBtn").hidden = false;
+  $("#rating").hidden = true;
+  $$("#rating button").forEach(b => b.disabled = true);
+  $("#reviewLeft").textContent = "还剩 " + (REVIEW.length - reviewIndex);
+}
+$("#revealBtn").onclick = () => {
+  const c = REVIEW[reviewIndex];
+  revealed = true;
+  $("#rvMeaning").textContent = c.m;
+  $("#rvExample").textContent = c.ex;
+  $("#rvBack").hidden = false;
+  $("#revealBtn").hidden = true;
+  $("#rating").hidden = false;
+  $$("#rating button").forEach(b => b.disabled = false);
+};
+function grade(g){
+  if (!revealed) return;
+  const word = REVIEW[reviewIndex].w;
+  reviewIndex++;
+  renderReview();
+  toast("已记录 · " + word, "撤销", () => { reviewIndex = Math.max(0, reviewIndex - 1); renderReview(); });
+}
+$$("#rating button").forEach(b => b.onclick = () => grade(+b.dataset.grade));
+$("#practiceMore").onclick = () => { reviewIndex = 0; renderReview(); };
+
+/* ---------- 词库 ---------- */
+let libTab = "all", libQuery = "";
+function renderLibrary(){
+  const list = LIB.filter(x =>
+    (libTab === "all" || x.s === libTab) &&
+    (x.w.includes(libQuery.toLowerCase()) || x.m.includes(libQuery)));
+  $("#wordList").innerHTML = list.length ? list.map(x => `
+    <div class="wrow">
+      <div class="w">${x.w}</div>
+      <div class="p">${x.phon}</div>
+      <div class="m">${x.m}</div>
+      <div class="due ${x.due === "明天" ? "today" : ""}">${x.due}</div>
+    </div>`).join("") : `<div class="empty">没有找到。换个拼写，或试试中文。</div>`;
+}
+$$("#libTabs button").forEach(b => b.onclick = () => {
+  libTab = b.dataset.tab;
+  $$("#libTabs button").forEach(x => x.classList.toggle("active", x === b));
+  renderLibrary();
+});
+$("#searchInput").oninput = e => { libQuery = e.target.value.trim(); renderLibrary(); };
+
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg, actionLabel, onAction){
+  const el = $("#toast");
+  el.innerHTML = `<span>${msg}</span>`;
+  if (actionLabel){
+    const b = document.createElement("button");
+    b.textContent = actionLabel;
+    b.onclick = () => { onAction?.(); el.classList.remove("show"); };
+    el.appendChild(b);
+  }
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), actionLabel ? 3000 : 1800);
+}
+
+/* ---------- init ---------- */
+applyPrefs();
+renderLibrary();
+renderReview();
+const startView = location.hash.replace("#", "");
+if (["today","library","review","progress","me","read","learn"].includes(startView)) show(startView);
+</script>
+</body>
+</html>
