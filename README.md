@@ -1,6 +1,10 @@
 
 # 基于智能体的个性化语境式英语词汇学习平台 · 设计方案
 
+> **[▶ 在线预览 MVP 原型](https://raw.githack.com/zlzhangliang666/english-vocab-platform/main/index.html)**（单文件 HTML，无需安装，点开即用）
+>
+> 前端设计文档：[英语词汇学习平台_前端设计.md](./英语词汇学习平台_前端设计.md)
+
 | 项目 | 内容 |
 |---|---|
 | 文档版本 | v1.3 |
